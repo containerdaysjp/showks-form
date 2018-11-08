@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Username:</strong>
+  <%= @project.username %>
+</p>
+
+<p>
+  <strong>Github:</strong>
+  <%= @project.github_id %>
+</p>
+
+<p>
+  <strong>Twitter:</strong>
+  <%= @project.twitter_id %>
+</p>
+
+<p>
+  <strong>Comment:</strong>
+  <%= @project.comment %>
+</p>
+
+<%= link_to 'Edit', edit_project_path(@project) %> |
+<%= link_to 'Back', projects_path %>
