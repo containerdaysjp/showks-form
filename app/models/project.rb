@@ -19,6 +19,10 @@ class Project < ApplicationRecord
     "showks-canvas-#{self.username}"
   end
 
+  def pipeline_path
+    "tmp/#{self.username}.yml"
+  end
+
   def create_repository
     client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
     if client.repository?("containerdaysjp/#{repository_name}")
@@ -42,7 +46,13 @@ class Project < ApplicationRecord
   end
 
   def create_pipeline
-
+    system("fly -t form login -c #{Rails.application.credentials.concourse[:url]} \
+            -u #{Rails.application.credentials.concourse[:username]} \
+            -p #{Rails.application.credentials.concourse[:password]}")
+    system("cp app/assets/config/pipeline.yml #{pipeline_path}")
+    system("sed -i 's/USERNAME/#{self.username}/' #{pipeline_path}")
+    system("fly -t form set-pipeline -p #{self.username} -c #{pipeline_path} -n")
+    system("fly -t form unpause-pipeline -p #{self.username}")
   end
 
   def create_spin
@@ -52,6 +62,10 @@ class Project < ApplicationRecord
   def cleanup
     client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
     client.delete_repository("containerdaysjp/#{repository_name}")
+    system("fly -t form login -c #{Rails.application.credentials.concourse[:url]} \
+            -u #{Rails.application.credentials.concourse[:username]} \
+            -p #{Rails.application.credentials.concourse[:password]}")
+    system("fly -t form destroy-pipeline -p #{self.username} -n")
   end
 
 end
