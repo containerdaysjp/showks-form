@@ -16,7 +16,7 @@ class Project < ApplicationRecord
   end
 
   def repository_name
-    "showk-canvas-#{self.username}"
+    "showks-canvas-#{self.username}"
   end
 
   def create_repository
