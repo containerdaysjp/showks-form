@@ -1,0 +1,13 @@
+---
+resources:
+- name: repo
+  type: git
+  source:
+    uri: https://github.com/containerdaysjp/showks-canvas-USERNAME.git
+
+jobs:
+- name: hello-job
+  public: true
+  plan:
+  - get: repo
+    trigger: true
