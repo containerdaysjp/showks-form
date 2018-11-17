@@ -10,8 +10,11 @@ class Project < ApplicationRecord
   private
   def provision
     create_repository
+    create_webhook("staging")
+    create_webhook("production")
     push_repository
-    create_pipeline
+    create_pipeline("staging")
+    create_pipeline("production")
     create_spin
   end
 
@@ -19,40 +22,46 @@ class Project < ApplicationRecord
     "showks-canvas-#{self.username}"
   end
 
-  def pipeline_path
-    "tmp/#{self.username}.yml"
+  def webhook_token
+    "hogefuga"
+  end
+
+  def pipeline_path(env)
+    "tmp/#{self.username}-#{env}.yaml"
   end
 
   def create_repository
-    client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
-    if client.repository?("containerdaysjp/#{repository_name}")
-      @repo = client.repository("containerdaysjp/#{repository_name}")
+    @client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
+    if @client.repository?("containerdaysjp/#{repository_name}")
+      @repo = @client.repository("containerdaysjp/#{repository_name}")
     else
-      @repo = client.create_repository(repository_name,{organization: "containerdaysjp"})
+      @repo = @client.create_repository(repository_name,{organization: "containerdaysjp"})
     end
+  end
 
-    client.create_hook(
+  def create_webhook(env)
+    @client.create_hook(
         @repo.full_name,
         "web",
-        {url: "http://example.com", content_type: "json"}, #TODO: Should be configurable.
+        {url: "http://concourse.showks.containerdays.jp/api/v1/teams/main/pipelines/#{self.username}-#{env}/resources/app/check/webhook?webhook_token=#{webhook_token}", content_type: "json"}, #TODO: Should be configurable.
         {events: ["push", "pull_request"], active: true})
   end
 
   def push_repository
-    repository = Rugged::Repository.new("/Users/jacopen/workspace/showks/showks-template")
+    repository = Rugged::Repository.new("app/assets/showks-canvas")
     auth = Rugged::Credentials::UserPassword.new(username: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
     remote = repository.remotes.create_anonymous(@repo.clone_url)
     remote.push("refs/heads/master", credentials: auth)
   end
 
-  def create_pipeline
-    system("fly -t form login -c #{Rails.application.credentials.concourse[:url]} \
+  def create_pipeline(env)
+    logger.debug `fly -t form login -c #{Rails.application.credentials.concourse[:url]} \
             -u #{Rails.application.credentials.concourse[:username]} \
-            -p #{Rails.application.credentials.concourse[:password]}")
-    system("cp app/assets/config/pipeline.yml #{pipeline_path}")
-    system("sed -i 's/USERNAME/#{self.username}/' #{pipeline_path}")
-    system("fly -t form set-pipeline -p #{self.username} -c #{pipeline_path} -n")
-    system("fly -t form unpause-pipeline -p #{self.username}")
+            -p #{Rails.application.credentials.concourse[:password]}`
+    logger.debug `cp app/assets/showks-concourse-pipelines/showks-canvas-USERNAME/#{env}.yaml #{pipeline_path(env)}`
+    logger.debug `sed -i 's/USERNAME/#{self.username}/' #{pipeline_path(env)}`
+    logger.debug `fly -t form set-pipeline -p #{self.username}-#{env} -c #{pipeline_path(env)} -n`
+    logger.debug `fly -t form unpause-pipeline -p #{self.username}-#{env}`
   end
 
   def create_spin
@@ -62,10 +71,11 @@ class Project < ApplicationRecord
   def cleanup
     client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
     client.delete_repository("containerdaysjp/#{repository_name}")
-    system("fly -t form login -c #{Rails.application.credentials.concourse[:url]} \
+    logger.debug system("fly -t form login -c #{Rails.application.credentials.concourse[:url]} \
             -u #{Rails.application.credentials.concourse[:username]} \
             -p #{Rails.application.credentials.concourse[:password]}")
-    system("fly -t form destroy-pipeline -p #{self.username} -n")
+    logger.debug `fly -t form destroy-pipeline -p #{self.username}-staging -n`
+    logger.debug `fly -t form destroy-pipeline -p #{self.username}-production -n`
   end
 
 end
