@@ -1,3 +1,5 @@
+require 'open3'
+
 class Project < ApplicationRecord
   validates :username, uniqueness: true, presence: true, format: { with: /\A[a-z0-9\-]+\z/}, length: { maximum: 50 }
   validates :github_id, uniqueness: true, presence: true, length: { maximum: 30 } #FIXME: need to check validation rule about github id
@@ -65,7 +67,8 @@ class Project < ApplicationRecord
   end
 
   def create_spin
-
+    logger.debug Open3.capture3("./deploy-canvas-pipelines.sh #{self.username}",
+                                chdir: "app/assets/showks-spinnaker-pipelines/showks-canvas")
   end
 
   def cleanup
@@ -76,6 +79,8 @@ class Project < ApplicationRecord
             -p #{Rails.application.credentials.concourse[:password]}")
     logger.debug `fly -t form destroy-pipeline -p #{self.username}-staging -n`
     logger.debug `fly -t form destroy-pipeline -p #{self.username}-production -n`
+    logger.debug Open3.capture3("./spin --config ./spinconfig application delete showks-canvas-#{self.username}",
+                                chdir: "app/assets/showks-spinnaker-pipelines/showks-canvas")
   end
 
 end
