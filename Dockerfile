@@ -21,6 +21,8 @@ RUN curl -vL https://github.com/concourse/concourse/releases/download/`curl -s h
 RUN curl -vL https://storage.googleapis.com/spinnaker-artifacts/spin/$(curl -s https://storage.googleapis.com/spinnaker-artifacts/spin/latest)/linux/amd64/spin -o /usr/local/bin/spin && \
     chmod +x /usr/local/bin/spin
 
+RUN env
+
 RUN rake assets:precompile RAILS_ENV=production
 
 EXPOSE 3000
