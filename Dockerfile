@@ -1,5 +1,7 @@
 FROM ruby:2.3.3
 
+ARG RAILS_MASTER_KEY
+
 ENV APP_ROOT /usr/src/showks-form
 ENV PIPELINE_ROOT /usr/src/showks-concourse-pipelines
 ENV CANVAS_ROOT /usr/src/showks-canvas
