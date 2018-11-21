@@ -54,6 +54,7 @@ class Project < ApplicationRecord
     auth = Rugged::Credentials::UserPassword.new(username: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
     remote = repository.remotes.create_anonymous(@repo.clone_url)
     remote.push("refs/heads/master", credentials: auth)
+    remote.push("refs/heads/master:refs/heads/staging", credentials: auth)
   end
 
   def create_pipeline(env)
