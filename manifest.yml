@@ -101,3 +101,17 @@ spec:
     targetPort: 3306
   selector:
     app: mysql
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: showks-form
+spec:
+  rules:
+  - host: form.stg.showks.containerdays.jp
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: showks-form-service
+          servicePort: 3000
