@@ -62,7 +62,10 @@ class Project < ApplicationRecord
             -p #{Rails.application.credentials.concourse[:password]}`
     logger.debug `cp app/assets/showks-concourse-pipelines/showks-canvas-USERNAME/#{env}.yaml #{pipeline_path(env)}`
     logger.debug `sed -i 's/USERNAME/#{self.username}/' #{pipeline_path(env)}`
-    logger.debug `fly -t form set-pipeline -p #{self.username}-#{env} -c #{pipeline_path(env)} -n`
+    File.open("tmp/params.yaml", "w") do |f|
+      f.puts(Rails.application.credentials.concourse_params)
+    end
+    logger.debug `fly -t form set-pipeline -p #{self.username}-#{env} -c #{pipeline_path(env)} -l tmp/params.yaml -n`
     logger.debug `fly -t form unpause-pipeline -p #{self.username}-#{env}`
   end
 
