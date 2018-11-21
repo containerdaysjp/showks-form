@@ -1,6 +1,19 @@
 require 'open3'
 
+class GitHubUserValidator < ActiveModel::Validator
+  def validate(record)
+    client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
+    begin
+      client.user(record.github_id)
+    rescue
+      record.errors[:github_id] << 'GitHubのユーザー名が見つかりません'
+    end
+  end
+end
+
 class Project < ApplicationRecord
+  include ActiveModel::Validations
+  validates_with GitHubUserValidator
   validates :username, uniqueness: true, presence: true, format: { with: /\A[a-z0-9\-]+\z/}, length: { maximum: 50 }
   validates :github_id, uniqueness: true, presence: true, length: { maximum: 30 } #FIXME: need to check validation rule about github id
   validates :twitter_id, format: { with: /\A[a-zA-Z0-9\_]+\z/}, length: { maximum: 15 }
@@ -15,6 +28,8 @@ class Project < ApplicationRecord
     create_webhook("staging")
     create_webhook("production")
     push_repository
+    add_collaborator
+    set_protected_branch
     create_pipeline("staging")
     create_pipeline("production")
     create_spin
@@ -37,7 +52,7 @@ class Project < ApplicationRecord
     if @client.repository?("containerdaysjp/#{repository_name}")
       @repo = @client.repository("containerdaysjp/#{repository_name}")
     else
-      @repo = @client.create_repository(repository_name,{organization: "containerdaysjp"})
+      @repo = @client.create_repository(repository_name,{organization: "containerdaysjp", team_id: 3013077})
     end
   end
 
@@ -55,6 +70,28 @@ class Project < ApplicationRecord
     remote = repository.remotes.create_anonymous(@repo.clone_url)
     remote.push("refs/heads/master", credentials: auth)
     remote.push("refs/heads/master:refs/heads/staging", credentials: auth)
+  end
+
+  def add_collaborator
+    @client.add_collaborator("containerdaysjp/#{repository_name}", self.username)
+  end
+
+  def set_protected_branch
+    options = {
+        enforce_admins: false,
+        required_pull_request_reviews: nil,
+        required_status_checks: {
+            strict: true,
+            contexts: []
+        },
+        restrictions: {
+            users: [],
+            teams: ["showks-members"]
+        }
+    }
+
+    @client.protect_branch("containerdaysjp/#{repository_name}", "master", options)
+    @client.protect_branch("containerdaysjp/#{repository_name}", "staging", options)
   end
 
   def create_pipeline(env)
@@ -76,15 +113,31 @@ class Project < ApplicationRecord
   end
 
   def cleanup
+    delete_repository
+    destroy_pipeline
+    delete_spin
+  end
+
+  def delete_repository
     client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
     client.delete_repository("containerdaysjp/#{repository_name}")
+  end
+
+
+  def destroy_pipeline
     logger.debug system("fly -t form login -c #{Rails.application.credentials.concourse[:url]} \
             -u #{Rails.application.credentials.concourse[:username]} \
             -p #{Rails.application.credentials.concourse[:password]}")
     logger.debug `fly -t form destroy-pipeline -p #{self.username}-staging -n`
     logger.debug `fly -t form destroy-pipeline -p #{self.username}-production -n`
+  end
+
+  def delete_spin
     logger.debug Open3.capture3("./spin --config ./spinconfig application delete showks-canvas-#{self.username}",
                                 chdir: "app/assets/showks-spinnaker-pipelines/showks-canvas")
   end
 
+  def github_user_exists?(user)
+  end
 end
+
