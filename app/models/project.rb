@@ -1,4 +1,5 @@
 require 'open3'
+require 'json'
 
 class GitHubUserValidator < ActiveModel::Validator
   def validate(record)
@@ -27,6 +28,7 @@ class Project < ApplicationRecord
     create_repository
     create_webhook("staging")
     create_webhook("production")
+    commit_json
     push_repository
     add_collaborator
     set_protected_branch
@@ -54,6 +56,8 @@ class Project < ApplicationRecord
     else
       @repo = @client.create_repository(repository_name,{organization: "containerdaysjp", team_id: 3013077})
     end
+
+    @local_repo = Rugged::Repository.new("app/assets/showks-canvas")
   end
 
   def create_webhook(env)
@@ -64,12 +68,48 @@ class Project < ApplicationRecord
         {events: ["push", "pull_request"], active: true})
   end
 
+  def commit_json
+    json = JSON.dump(
+        {
+            userName: self.username,
+            gitHubId: self.github_id,
+            twitterId: self.twitter_id,
+            comment: self.comment
+        }
+    )
+
+    File.open("app/assets/showks-canvas/src/data/author.json", "w") do |f|
+      f.puts(json)
+    end
+
+    @local_repo.create_branch(self.username, "refs/heads/master")
+    @local_repo.checkout("refs/heads/#{self.username}")
+
+    commit_author = { email: "showks-containerdaysjp@gmail.com", name: "showks-containerdaysjp", time: Time.now}
+
+    index = @local_repo.index
+    index.add("src/data/author.json")
+    commit_tree = index.write_tree(@local_repo)
+    index.write
+
+    Rugged::Commit.create(
+        @local_repo,
+        author: commit_author,
+        commiter: commit_author,
+        message: "Add",
+        parents: [@local_repo.head.target],
+        tree: commit_tree,
+        update_ref: "HEAD"
+    )
+  end
+
   def push_repository
-    repository = Rugged::Repository.new("app/assets/showks-canvas")
     auth = Rugged::Credentials::UserPassword.new(username: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
-    remote = repository.remotes.create_anonymous(@repo.clone_url)
-    remote.push("refs/heads/master", credentials: auth)
-    remote.push("refs/heads/master:refs/heads/staging", credentials: auth)
+    remote = @local_repo.remotes.create_anonymous(@repo.clone_url)
+    remote.push("refs/heads/#{self.username}:refs/heads/master", credentials: auth)
+    remote.push("refs/heads/#{self.username}:refs/heads/staging", credentials: auth)
+    @local_repo.checkout("refs/heads/master")
+    @local_repo.branches.delete("#{self.username}")
   end
 
   def add_collaborator
@@ -99,7 +139,7 @@ class Project < ApplicationRecord
             -u #{Rails.application.credentials.concourse[:username]} \
             -p #{Rails.application.credentials.concourse[:password]}`
     logger.debug `cp app/assets/showks-concourse-pipelines/showks-canvas-USERNAME/#{env}.yaml #{pipeline_path(env)}`
-    logger.debug `sed -i 's/USERNAME/#{self.username}/' #{pipeline_path(env)}`
+    logger.debug `sed -i '' -e 's/USERNAME/#{self.username}/' #{pipeline_path(env)}`
     File.open("tmp/params.yaml", "w") do |f|
       f.puts(Rails.application.credentials.concourse_params)
     end
@@ -140,4 +180,3 @@ class Project < ApplicationRecord
   def github_user_exists?(user)
   end
 end
-
