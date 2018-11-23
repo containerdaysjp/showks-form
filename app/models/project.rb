@@ -3,6 +3,9 @@ require 'json'
 
 class GitHubUserValidator < ActiveModel::Validator
   def validate(record)
+    if record.username.include?("demoaccount")
+      return true
+    end
     client = Octokit::Client.new(login: Rails.application.credentials.github[:username], password: Rails.application.credentials.github[:password])
     begin
       client.user(record.github_id)
@@ -58,6 +61,8 @@ class Project < ApplicationRecord
     end
 
     @local_repo = Rugged::Repository.new("app/assets/showks-canvas")
+    @local_repo.config["user.name"]="showks-containerdaysjp"
+    @local_repo.config["user.email"]="showks-containerdaysjp@gmail.com"
   end
 
   def create_webhook(env)
@@ -113,7 +118,9 @@ class Project < ApplicationRecord
   end
 
   def add_collaborator
-    @client.add_collaborator("containerdaysjp/#{repository_name}", self.username)
+    unless self.username.include?("demoaccount")
+      @client.add_collaborator("containerdaysjp/#{repository_name}", self.username)
+    end
   end
 
   def set_protected_branch
