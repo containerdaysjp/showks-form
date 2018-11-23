@@ -36,6 +36,8 @@ spec:
               secretKeyRef:
                 name: masterkey
                 key: masterkey
+          - name: RAILS_LOG_TO_STDOUT
+            value: "true"
         lifecycle:
           postStart:
             exec:
