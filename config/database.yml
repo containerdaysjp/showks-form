@@ -22,10 +22,10 @@ test:
 
 production:
   adapter: mysql2
-  encoding: utf8
-  reconnect: false
+  encoding: utf8mb4
+  reconnect: true
   database: <%= ENV["DB_DATABASE"] %>
-  pool: 5
+  pool: 20
   username: <%= ENV["DB_USERNAME"] %>
   password: <%= ENV["DB_PASSWORD"] %>
   host: <%= ENV["DB_HOST"] %>
