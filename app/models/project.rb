@@ -31,12 +31,14 @@ class Project < ApplicationRecord
     create_repository
     create_webhook("staging")
     create_webhook("production")
+    create_pr_webhook
     commit_json
     push_repository
     add_collaborator
     set_protected_branch
     create_pipeline("staging")
     create_pipeline("production")
+    create_pipeline("pr")
     create_spin
   end
 
@@ -45,7 +47,7 @@ class Project < ApplicationRecord
   end
 
   def webhook_token
-    "hogefuga"
+    Rails.application.credentials[:webhook_token]
   end
 
   def pipeline_path(env)
@@ -70,7 +72,15 @@ class Project < ApplicationRecord
         @repo.full_name,
         "web",
         {url: "http://concourse.showks.containerdays.jp/api/v1/teams/main/pipelines/#{self.username}-#{env}/resources/app/check/webhook?webhook_token=#{webhook_token}", content_type: "json"}, #TODO: Should be configurable.
-        {events: ["push", "pull_request"], active: true})
+        {events: ["push"], active: true})
+  end
+
+  def create_pr_webhook
+    @client.create_hook(
+        @repo.full_name,
+        "web",
+        {url: "http://concourse.showks.containerdays.jp/api/v1/teams/main/pipelines/#{self.username}-pr/resources/showks-canvas-pr/check/webhook?webhook_token=#{webhook_token}", content_type: "json"}, #TODO: Should be configurable.
+        {events: ["pull_request"], active: true})
   end
 
   def commit_json
@@ -146,7 +156,7 @@ class Project < ApplicationRecord
             -u #{Rails.application.credentials.concourse[:username]} \
             -p #{Rails.application.credentials.concourse[:password]}`
     logger.debug `cp app/assets/showks-concourse-pipelines/showks-canvas-USERNAME/#{env}.yaml #{pipeline_path(env)}`
-    logger.debug `sed -i '' -e 's/USERNAME/#{self.username}/' #{pipeline_path(env)}`
+    logger.debug `sed -i '' -e 's/USERNAME/#{self.username}/' #{pipeline_path(env)}` #TODO: should replace to erb template
     File.open("tmp/params.yaml", "w") do |f|
       f.puts(Rails.application.credentials.concourse_params)
     end
@@ -177,6 +187,7 @@ class Project < ApplicationRecord
             -p #{Rails.application.credentials.concourse[:password]}")
     logger.debug `fly -t form destroy-pipeline -p #{self.username}-staging -n`
     logger.debug `fly -t form destroy-pipeline -p #{self.username}-production -n`
+    logger.debug `fly -t form destroy-pipeline -p #{self.username}-pr -n`
   end
 
   def delete_spin
