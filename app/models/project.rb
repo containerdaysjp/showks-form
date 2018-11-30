@@ -71,7 +71,7 @@ class Project < ApplicationRecord
     @client.create_hook(
         @repo.full_name,
         "web",
-        {url: "http://concourse.showks.containerdays.jp/api/v1/teams/main/pipelines/#{self.username}-#{env}/resources/app/check/webhook?webhook_token=#{webhook_token}", content_type: "json"}, #TODO: Should be configurable.
+        {url: "https://concourse.showks.containerdays.jp/api/v1/teams/main/pipelines/#{self.username}-#{env}/resources/app/check/webhook?webhook_token=#{webhook_token}", content_type: "json"}, #TODO: Should be configurable.
         {events: ["push"], active: true})
   end
 
@@ -79,7 +79,7 @@ class Project < ApplicationRecord
     @client.create_hook(
         @repo.full_name,
         "web",
-        {url: "http://concourse.showks.containerdays.jp/api/v1/teams/main/pipelines/#{self.username}-pr/resources/showks-canvas-pr/check/webhook?webhook_token=#{webhook_token}", content_type: "json"}, #TODO: Should be configurable.
+        {url: "https://concourse.showks.containerdays.jp/api/v1/teams/main/pipelines/#{self.username}-pr/resources/showks-canvas-pr/check/webhook?webhook_token=#{webhook_token}", content_type: "json"}, #TODO: Should be configurable.
         {events: ["pull_request"], active: true})
   end
 
