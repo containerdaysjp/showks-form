@@ -4,35 +4,45 @@
       <td><p id="notice"><%= notice %></p></td>
     </tr>
     <tr>
-      <th>User: <%= @project.username %></th>
+      <th colspan="2">User: <%= @project.username %></th>
     </tr>
     <tr>
-      <td>
+      <td colspan="2">
         <%= link_to("GitHub repository",
                     "https://github.com/containerdaysjp/showks-canvas-#{@project.github_id}") %>
       </td>
     </tr>
     <tr>
+      <th>Staging</th>
+      <th>Production</th>
+    </tr>
+    <tr>
       <td>
-        <%= link_to("Portal (Staging)",
+        <%= link_to("Portal",
                     "https://portal.stg.showks.containerdays.jp") %>
       </td>
-    </tr>
-    <tr>
       <td>
-        <%= link_to("Portal (Production)",
-                    "https://portal.prod.showks.containerdays.jp") %>
+        <%= link_to("Portal",
+                    "https://portal.showks.containerdays.jp") %>
       </td>
     </tr>
     <tr>
       <td>
-        <%= link_to("Concourse CI (Staging)",
+        <%= link_to("Canvas",
+                    "https://showks-canvas-#{@project.username}.stg.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-staging") %><br />
+      </td>
+      <td>
+        <%= link_to("Canvas",
+                    "https://showks-canvas-#{@project.username}.prod.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-staging") %><br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <%= link_to("Concourse CI",
                     "https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-staging") %><br />
       </td>
-    </tr>
-    <tr>
       <td>
-        <%= link_to("Concourse CI (Production)",
+        <%= link_to("Concourse CI",
                     "https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-production") %><br />
       </td>
     </tr>
@@ -40,6 +50,8 @@
       <td>
         <%= link_to("Concourse CI (PR)",
                     "https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-pr") %><br />
+      </td>
+      <td>
       </td>
     </tr>
   </table>
