@@ -1,4 +1,6 @@
-<%= form_with(model: project, local: true) do |form| %>
+<%= form_with(model: project, local: true, class: "col-4" ) do |form| %>
+  <%= image_tag("showks.png", width: 250, height: "250") %>
+  <h1 class="h3 mb-3 font-weight-normal">Create new project</h1>
   <% if project.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(project.errors.count, "error") %> prohibited this project from being saved:</h2>
@@ -12,26 +14,28 @@
   <% end %>
 
   <div class="field">
-    <%= form.label :username %>
-    <%= form.text_field :username %>
+    <%= form.label(:username, class: "sr-only") %>
+    <%= form.text_field(:username, class: "form-control", placeholder: "Username") %>
   </div>
 
   <div class="field">
-    <%= form.label :github_id %>
-    <%= form.text_field :github_id %>
+    <%= form.label(:github_id, class: "sr-only") %>
+    <%= form.text_field(:github_id, class: "form-control", placeholder: "GitHub ID") %>
   </div>
 
   <div class="field">
-    <%= form.label :twitter_id %>
-    <%= form.text_field :twitter_id %>
+    <%= form.label(:twitter_id, class: "sr-only") %>
+    <%= form.text_field(:twitter_id, class: "form-control", placeholder: "Twitter ID") %>
   </div>
 
   <div class="field">
-    <%= form.label :comment %>
-    <%= form.text_field :comment %>
+    <%= form.label(:comment, class: "sr-only") %>
+    <%= form.text_field(:comment, class: "form-control", placeholder: "Comment") %>
   </div>
 
-  <div class="actions">
-    <%= form.submit %>
+  <div class="checkbox mb-3">
+    <div class="actions">
+    <%= form.submit(class: "btn btn-lg btn-primary btn-block")%>
+    </div>
   </div>
 <% end %>
