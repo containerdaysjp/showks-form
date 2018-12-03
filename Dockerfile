@@ -9,9 +9,10 @@ ENV CANVAS_ROOT /usr/src/showks-canvas
 WORKDIR $APP_ROOT
 
 COPY Gemfile Gemfile.lock $APP_ROOT/
-RUN apt-get update && \
-    apt-get install -y cmake jq mysql-client sqlite3 nodejs npm && \
-    npm install -g yarnpkg && \
+RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - \
+    apt-get update && \
+    apt-get install -y cmake jq mysql-client sqlite3 nodejs build-essential && \
+    npm install -g yarn && \
     bundle install
 COPY . $APP_ROOT/
 COPY app/assets/showks-concourse-pipelines/ $PIPELINE_ROOT/
