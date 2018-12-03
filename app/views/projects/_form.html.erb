@@ -1,5 +1,5 @@
 <%= form_with(model: project, local: true, class: "col-4" ) do |form| %>
-  <%= image_tag("showks.png", width: 250, height: "250") %>
+  <%= image_tag("showks.png", width: 250, height: 250) %>
   <h1 class="h3 mb-3 font-weight-normal">Create new project</h1>
   <% if project.errors.any? %>
     <div id="error_explanation">
@@ -15,24 +15,20 @@
 
   <div class="field">
     <%= form.label(:username, class: "sr-only") %>
-    <%= form.text_field(:username, class: "form-control", placeholder: "Username") %>
+    <%= form.text_field(:username, class: "form-control", placeholder: "Username", required: true, autofocus: true) %>
   </div>
-
   <div class="field">
     <%= form.label(:github_id, class: "sr-only") %>
-    <%= form.text_field(:github_id, class: "form-control", placeholder: "GitHub ID") %>
+    <%= form.text_field(:github_id, class: "form-control", placeholder: "GitHub ID", required: true) %>
   </div>
-
   <div class="field">
     <%= form.label(:twitter_id, class: "sr-only") %>
     <%= form.text_field(:twitter_id, class: "form-control", placeholder: "Twitter ID") %>
   </div>
-
   <div class="field">
     <%= form.label(:comment, class: "sr-only") %>
     <%= form.text_field(:comment, class: "form-control", placeholder: "Comment") %>
   </div>
-
   <div class="checkbox mb-3">
     <div class="actions">
     <%= form.submit(class: "btn btn-lg btn-primary btn-block")%>
