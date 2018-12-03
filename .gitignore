@@ -34,3 +34,12 @@
 
 *.iml
 /.idea
+
+
+.DS_Store
+app/assets/showks-canvas/
+app/assets/showks-concourse-pipelines/
+app/assets/showks-spinnaker-pipelines/
+secret.yml
+
+
