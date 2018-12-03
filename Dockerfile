@@ -9,8 +9,9 @@ ENV CANVAS_ROOT /usr/src/showks-canvas
 WORKDIR $APP_ROOT
 
 COPY Gemfile Gemfile.lock $APP_ROOT/
-RUN apt-get update && \
-    apt-get install -y cmake jq mysql-client sqlite3 nodejs npm && \
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash && \
+    apt-get update && \
+    apt-get install -y cmake jq mysql-client sqlite3 nodejs && \
     npm install -g yarnpkg && \
     bundle install
 COPY . $APP_ROOT/
