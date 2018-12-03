@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       get 'destroy_demoaccount'
     end
   end
+  root to: "projects#new"
   # resources :projects, only: [:new] do
   #   resources :admin, only: [:index]
   # end

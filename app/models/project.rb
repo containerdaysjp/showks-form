@@ -162,6 +162,7 @@ class Project < ApplicationRecord
     end
     logger.debug `fly -t form set-pipeline -p #{self.username}-#{env} -c #{pipeline_path(env)} -l tmp/params.yaml -n`
     logger.debug `fly -t form unpause-pipeline -p #{self.username}-#{env}`
+    logger.debug `fly -t form expose-pipeline -p #{self.username}-#{env}`
   end
 
   def create_spin

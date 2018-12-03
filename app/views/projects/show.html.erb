@@ -7,18 +7,23 @@
 
 <p>
   <strong>Github:</strong>
-  <%= @project.github_id %>
+  <%= link_to("https://github.com/containerdaysjp/showks-canvas-#{@project.github_id}",
+              "https://github.com/containerdaysjp/showks-canvas-#{@project.github_id}") %>
+
 </p>
 
 <p>
-  <strong>Twitter:</strong>
-  <%= @project.twitter_id %>
+  <strong>Your canvas application (It takes a few minutes)</strong>
+  <%= link_to("https://github.com/containerdaysjp/showks-canvas-#{@project.username}",
+              "https://github.com/containerdaysjp/showks-canvas-#{@project.username}") %>
 </p>
 
 <p>
-  <strong>Comment:</strong>
-  <%= @project.comment %>
+  <strong>CI pipelines</strong>
+  Staging: <%= link_to("https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-staging",
+                       "https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-staging") %><br />
+  Production: <%= link_to("https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-production",
+                          "https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-production") %><br />
+  Pull Request: <%= link_to("https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-pr",
+                            "https://concourse.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-pr") %><br />
 </p>
-
-<%= link_to 'Edit', edit_project_path(@project) %> |
-<%= link_to 'Back', projects_path %>
