@@ -9,7 +9,7 @@
     <tr>
       <td colspan="2">
         <%= link_to("GitHub repository",
-                    "https://github.com/containerdaysjp/showks-canvas-#{@project.github_id}") %>
+                    "https://github.com/containerdaysjp/showks-canvas-#{@project.username}") %>
       </td>
     </tr>
     <tr>
@@ -29,11 +29,11 @@
     <tr>
       <td>
         <%= link_to("Canvas",
-                    "https://showks-canvas-#{@project.username}.stg.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-staging") %><br />
+                    "https://showks-canvas-#{@project.username}.stg.showks.containerdays.jp/") %><br />
       </td>
       <td>
         <%= link_to("Canvas",
-                    "https://showks-canvas-#{@project.username}.prod.showks.containerdays.jp/teams/main/pipelines/#{@project.username}-staging") %><br />
+                    "https://showks-canvas-#{@project.username}.prod.showks.containerdays.jp/") %><br />
       </td>
     </tr>
     <tr>
