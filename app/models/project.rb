@@ -23,8 +23,8 @@ class Project < ApplicationRecord
   validates :twitter_id, format: { with: /\A[a-zA-Z0-9\_]+\z/}, length: { maximum: 15 }
   validates :comment, length: { maximum: 100 }
 
-  before_create :provision
-  before_destroy :cleanup
+  #before_create :provision
+  #before_destroy :cleanup
 
   private
   def provision

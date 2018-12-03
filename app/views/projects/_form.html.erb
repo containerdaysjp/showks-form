@@ -1,5 +1,5 @@
-<%= form_with(model: project, local: true, class: "col-4" ) do |form| %>
-  <%= image_tag("showks.png", width: 250, height: 250) %>
+<%= form_with(model: project, local: true, class: "col-md-4 col-xs-10" ) do |form| %>
+  <%= image_tag("showks.png", width: "100%") %>
   <h1 class="h3 mb-3 font-weight-normal">Create new project</h1>
   <% if project.errors.any? %>
     <div id="error_explanation">
