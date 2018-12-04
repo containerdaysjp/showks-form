@@ -123,6 +123,7 @@ class Project < ApplicationRecord
     remote = @local_repo.remotes.create_anonymous(@repo.clone_url)
     remote.push("refs/heads/#{self.username}:refs/heads/master", credentials: auth)
     remote.push("refs/heads/#{self.username}:refs/heads/staging", credentials: auth)
+    remote.push("refs/heads/#{self.username}:refs/heads/feature", credentials: auth)
     @local_repo.checkout("refs/heads/master")
     @local_repo.branches.delete("#{self.username}")
   end
