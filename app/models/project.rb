@@ -130,7 +130,7 @@ class Project < ApplicationRecord
 
   def add_collaborator
     unless self.username.include?("demoaccount")
-      @client.add_collaborator("containerdaysjp/#{repository_name}", self.username)
+      @client.add_collaborator("containerdaysjp/#{repository_name}", self.github_id)
     end
   end
 
